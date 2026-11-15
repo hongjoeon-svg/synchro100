@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Synchro 100 · Host</title>
+<meta name="description" content="링크 눌러 바로 참여! 제시어를 보고 15초 안에 남들과 같은 단어를 빠르게 쓰면 고득점. 2030 모임용 이심전심 타임어택 파티 게임." />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Synchro 100" />
+<meta property="og:title" content="Synchro 100 · 이심전심 타임어택 🔥" />
+<meta property="og:description" content="링크 눌러 바로 참여! 15초 안에 모두와 같은 단어를 쓰면 고득점. 우리 중 누가 제일 잘 통할까?" />
+<meta property="og:image" content="__BASE_URL__/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:url" content="__BASE_URL__/" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/png" href="/icon.png" />
+<link rel="apple-touch-icon" href="/icon.png" />
+<link rel="stylesheet" href="/style.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  body { min-height: 100vh; }
+  header { display: flex; align-items: center; gap: 18px; padding: 18px 32px; }
+  header .logo { font-size: 2rem; }
+  header .round { margin-left: auto; font-family: var(--display); font-size: 1.4rem; color: var(--muted); }
+  header .round b { color: var(--text); }
+  header .ctrl { display: flex; gap: 8px; }
+  header .ctrl .btn { font-size: .95rem; padding: 8px 14px; box-shadow: none; }
+
+  main { padding: 0 32px 32px; display: grid; grid-template-columns: 1fr 380px; gap: 28px; min-height: calc(100vh - 90px); }
+  .stage { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 32px; position: relative; overflow: hidden; }
+
+  /* lobby */
+  .lobby h1 { font-family: var(--display); font-size: clamp(3rem, 7vw, 6.5rem); line-height: 1; }
+  .lobby h1 b { color: var(--lime); } .lobby h1 i { font-style: normal; color: var(--pink); }
+  .lobby .tag { color: var(--muted); font-size: 1.2rem; margin: 12px 0 30px; }
+  .join { display: flex; gap: 26px; align-items: center; background: rgba(0,0,0,.25); padding: 20px 26px; border-radius: 20px; margin-bottom: 26px; }
+  #qr { background: #fff; padding: 10px; border-radius: 12px; width: 160px; height: 160px; }
+  #qr:empty { display: none; }
+  .join .url { font-family: var(--display); font-size: 2rem; color: var(--cyan); word-break: break-all; text-align: left; }
+  .join small { display: block; color: var(--muted); font-size: 1rem; margin-bottom: 6px; text-align: left; }
+  .join .acts { display: flex; gap: 8px; margin-top: 12px; }
+  .join .acts .btn { font-size: 1rem; padding: 10px 16px; box-shadow: 0 4px 0 #7fae10; }
+  .join .acts .btn.ghost { box-shadow: none; }
+  #toast { position: fixed; left: 50%; bottom: 36px; transform: translate(-50%, 30px); opacity: 0; z-index: 80;
+    background: var(--lime); color: #120f2a; font-weight: 900; padding: 12px 22px; border-radius: 999px; transition: .3s; pointer-events: none; }
+  #toast.on { opacity: 1; transform: translate(-50%, 0); }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; max-width: 900px; margin-bottom: 28px; min-height: 44px; }
+  .chip { padding: 8px 16px; border-radius: 999px; background: var(--bg2); border: 1px solid var(--line); font-weight: 700; animation: pop .35s ease-out both; }
+  .rules { color: var(--muted); font-size: 1rem; margin-top: 18px; line-height: 1.7; }
+  .rules b { color: var(--lime); }
+
+  /* ready */
+  .ready .lbl { font-family: var(--display); font-size: 2.4rem; color: var(--muted); }
+  .ready .cnt { font-family: var(--display); font-size: 16rem; line-height: 1; color: var(--lime); }
+  .ready .cnt.tick { animation: pop .6s ease-out; }
+
+  /* input */
+  .play .q-lbl { font-family: var(--display); color: var(--pink); font-size: 1.5rem; letter-spacing: 2px; }
+  .play .prompt { font-family: var(--display); font-size: clamp(2.6rem, 5vw, 4.6rem); line-height: 1.2; word-break: keep-all; margin: 10px 0 30px; animation: rise .5s ease-out; }
+  .play .ring { width: min(300px, 34vh); height: min(300px, 34vh); }
+  .play .ring .num { font-size: min(8rem, 13vh); }
+  .play .sub { margin-top: 28px; width: min(560px, 90%); }
+  .play .sub .meta { display: flex; justify-content: space-between; color: var(--muted); font-weight: 700; margin-bottom: 8px; }
+  .play .sub .meta b { color: var(--text); }
+  .meter { height: 14px; background: rgba(255,255,255,.08); border-radius: 99px; overflow: hidden; }
+  .meter i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--cyan), var(--lime)); transition: width .4s; }
+
+  /* final */
+  .final h2 { font-family: var(--display); font-size: 2rem; color: var(--muted); }
+  .final .winner { font-family: var(--display); font-size: clamp(3.5rem, 8vw, 7rem); margin: 8px 0;
+    background: linear-gradient(90deg, var(--gold), #fff7c2, var(--gold)); background-size: 200% auto;
+    -webkit-background-clip: text; background-clip: text; color: transparent; animation: shine 2s linear infinite, pop .8s ease-out; }
+  .final .wscore { font-family: var(--display); font-size: 2.2rem; color: var(--lime); margin-bottom: 30px; }
+
+  /* leaderboard */
+  aside { display: flex; flex-direction: column; padding: 22px; }
+  aside h3 { font-family: var(--display); font-size: 1.5rem; display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+  aside h3 small { font-family: 'Noto Sans KR'; font-size: .9rem; color: var(--muted); }
+  #board { position: relative; flex: 1; overflow: hidden; }
+  .row { position: absolute; left: 0; right: 0; height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 14px;
+    border-radius: 14px; background: rgba(255,255,255,.04); transition: top .7s cubic-bezier(.2,.8,.2,1), background .3s; }
+  .row .rk { font-family: var(--display); width: 30px; text-align: center; font-size: 1.3rem; color: var(--muted); }
+  .row.r1 .rk { color: var(--gold); } .row.r2 .rk { color: var(--silver); } .row.r3 .rk { color: var(--bronze); }
+  .row.r1 { background: rgba(255,210,61,.12); }
+  .row .nm { flex: 1; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row.off .nm { opacity: .4; }
+  .row .gain { font-weight: 900; color: var(--lime); font-size: .95rem; animation: rise .5s ease-out; }
+  .row .sc { font-family: var(--display); font-size: 1.3rem; min-width: 64px; text-align: right; }
+  .row .ok { width: 9px; height: 9px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 8px var(--lime); }
+  .empty { color: var(--muted); text-align: center; margin-top: 40px; }
+
+  /* result popup */
+  #popup { position: fixed; inset: 0; background: rgba(8,6,22,.88); backdrop-filter: blur(6px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 50; transition: opacity .5s; }
+  #popup.fade { opacity: 0; pointer-events: none; }
+  #popup .ttl { font-family: var(--display); font-size: 2.6rem; color: var(--muted); margin-bottom: 8px; }
+  #popup .pq { font-size: 1.4rem; color: var(--cyan); font-weight: 700; margin-bottom: 40px; }
+  .podium { display: flex; align-items: flex-end; gap: 22px; }
+  .pod { width: min(280px, 28vw); text-align: center; opacity: 0; }
+  .pod.show { animation: rise .6s cubic-bezier(.2,.9,.3,1.3) forwards; }
+  .pod .word { font-family: var(--display); font-size: 2.6rem; margin-bottom: 4px; word-break: keep-all; }
+  .pod .who { color: var(--muted); font-size: .95rem; min-height: 2.6em; margin-bottom: 12px; padding: 0 8px; }
+  .pod .block { border-radius: 18px 18px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 18px; color: #120f2a; }
+  .pod .block .medal { font-family: var(--display); font-size: 3.5rem; line-height: 1; }
+  .pod .block .cnt { font-weight: 900; font-size: 1.3rem; }
+  .pod.p1 .block { height: 260px; background: linear-gradient(var(--gold), #e0a800); }
+  .pod.p2 .block { height: 190px; background: linear-gradient(var(--silver), #9aa3b8); }
+  .pod.p3 .block { height: 140px; background: linear-gradient(var(--bronze), #c8601f); }
+  .pod.p1 .word { font-size: 3.4rem; color: var(--gold); }
+  @media (max-width: 960px) {
+    header { padding: 14px 16px; flex-wrap: wrap; gap: 10px; }
+    header .logo { font-size: 1.5rem; }
+    main { grid-template-columns: 1fr; padding: 0 16px 16px; gap: 16px; }
+    .stage { padding: 24px 16px; min-height: 60vh; }
+    .join { flex-direction: column; text-align: center; gap: 14px; padding: 18px; }
+    .join small, .join .url { text-align: center; }
+    .join .url { font-size: 1.4rem; }
+    .join .acts { justify-content: center; }
+    #board { min-height: 300px; }
+    .podium { gap: 8px; }
+    .pod .word { font-size: 1.6rem; } .pod.p1 .word { font-size: 2rem; }
+  }
+  #toast { white-space: nowrap; }
+  .nores { font-family: var(--display); font-size: 3rem; color: var(--pink); }
+</style>
+</head>
+<body>
+<div id="conn"></div>
+<header>
+  <div class="logo">SYNCHRO <b>1</b><i>00</i></div>
+  <div class="round" id="roundLbl"></div>
+  <div class="ctrl">
+    <button class="btn ghost hidden" id="copyBtn2" title="참가 링크 복사">🔗 링크 복사</button>
+    <button class="btn ghost hidden" id="skipBtn" title="다음 단계로 건너뛰기">⏭ 건너뛰기</button>
+    <button class="btn ghost" id="resetBtn" title="점수 초기화 후 로비로">↺ 리셋</button>
+  </div>
+</header>
+
+<main>
+  <section class="card stage">
+    <!-- 로비 -->
+    <div class="lobby" id="vLobby">
+      <h1>SYNCHRO <b>1</b><i>00</i></h1>
+      <p class="tag">같은 생각, 빠른 손. 이심전심 타임어택!</p>
+      <div class="join">
+        <div id="qr"></div>
+        <div><small id="joinHint">휴대폰으로 접속하세요</small><div class="url" id="joinUrl">…</div>
+          <div class="acts"><button class="btn" id="copyBtn">🔗 링크 복사</button><button class="btn ghost hidden" id="shareBtn">공유하기</button></div></div>
+      </div>
+      <div class="chips" id="chips"></div>
+      <button class="btn" id="startBtn" disabled>게임 시작 ▶</button>
+      <p class="rules">제시어를 보고 <b>15초</b> 안에 단어 1개 제출 · 점수 = <b>같은 단어 쓴 사람 수 × 남은 초 × 10</b><br>혼자 쓴 단어는 0점! 남들과 통하면서 빨리 쓸수록 고득점</p>
+    </div>
+
+    <!-- 준비 -->
+    <div class="ready hidden" id="vReady">
+      <div class="lbl" id="readyLbl">ROUND 1</div>
+      <div class="cnt" id="readyCnt">3</div>
+    </div>
+
+    <!-- 입력 -->
+    <div class="play hidden" id="vPlay">
+      <div class="q-lbl">Q. 제시어</div>
+      <div class="prompt" id="prompt"></div>
+      <div class="ring" id="ring">
+        <svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="52"/><circle class="bar" id="ringBar" cx="60" cy="60" r="52"/></svg>
+        <div class="num" id="ringNum">15</div>
+      </div>
+      <div class="sub">
+        <div class="meta"><span>제출 현황</span><span><b id="subCnt">0</b> / <span id="subTot">0</span>명</span></div>
+        <div class="meter"><i id="subBar"></i></div>
+      </div>
+    </div>
+
+    <!-- 최종 -->
+    <div class="final hidden" id="vFinal">
+      <h2>🏆 최종 싱크로 챔피언</h2>
+      <div class="winner" id="winner"></div>
+      <div class="wscore" id="wscore"></div>
+      <button class="btn" id="againBtn">한 판 더! ↻</button>
+    </div>
+  </section>
+
+  <aside class="card">
+    <h3>싱크로 리더보드 <small id="pc">0명</small></h3>
+    <div id="board"></div>
+  </aside>
+</main>
+
+<div id="popup" class="fade">
+  <div class="ttl" id="popTtl">ROUND 1 결과</div>
+  <div class="pq" id="popQ"></div>
+  <div class="podium" id="podium"></div>
+</div>
+
+<div id="toast"></div>
+<script src="/common.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const { esc } = S100;
+let st = null, lastKey = '', qrDone = '', popTimer = null;
+const CIRC = 2 * Math.PI * 52;
+$('ringBar').style.strokeDasharray = CIRC;
+
+S100.on('state', (s) => { st = s; render(); });
+S100.start(() => S100.send({ t: 'host' }));
+
+$('startBtn').onclick = $('againBtn').onclick = () => S100.send({ t: 'start' });
+// ── 링크 복사 / 공유 ──
+const inviteText = () => `🔥 Synchro 100 같이 해요!\n링크 눌러서 닉네임만 넣으면 바로 참여 👇\n${st?.joinUrl || location.origin}`;
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2200); }
+async function copyInvite() {
+  const text = inviteText();
+  try { await navigator.clipboard.writeText(text); }
+  catch { // http(LAN) 환경 등 clipboard API가 막힌 경우
+    const ta = Object.assign(document.createElement('textarea'), { value: text });
+    ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand('copy'); ta.remove();
+    if (!ok) return prompt('아래 내용을 복사해 카톡에 붙여넣으세요', text);
+  }
+  toast('✅ 복사 완료! 카톡 단톡방에 붙여넣으세요');
+}
+$('copyBtn').onclick = $('copyBtn2').onclick = copyInvite;
+if (navigator.share) {
+  $('shareBtn').classList.remove('hidden');
+  $('shareBtn').onclick = () => navigator.share({ title: 'Synchro 100', text: inviteText().split('\n').slice(0, 2).join('\n'), url: st?.joinUrl }).catch(() => {});
+}
+$('skipBtn').onclick = () => S100.send({ t: 'skip' });
+$('resetBtn').onclick = () => confirm('점수를 초기화하고 로비로 돌아갈까요?') && S100.send({ t: 'reset' });
+
+function show(view) {
+  ['vLobby', 'vReady', 'vPlay', 'vFinal'].forEach((v) => $(v).classList.toggle('hidden', v !== view));
+}
+
+function render() {
+  const s = st, key = s.phase + s.round;
+  const entered = key !== lastKey; lastKey = key;
+
+  $('roundLbl').innerHTML = s.round ? `ROUND <b>${s.round}</b> / ${s.totalRounds}` : '';
+  $('skipBtn').classList.toggle('hidden', !['input', 'result'].includes(s.phase));
+  $('copyBtn2').classList.toggle('hidden', s.phase === 'lobby');
+  $('pc').textContent = `${s.playerCount}명 접속`;
+
+  if (s.phase === 'lobby') {
+    show('vLobby');
+    $('joinUrl').textContent = s.joinUrl.replace(/^https?:\/\//, '');
+    $('joinHint').textContent = s.joinUrl.startsWith('https') ? 'QR 찍거나 카톡으로 링크를 보내세요' : '휴대폰으로 접속하세요 (같은 Wi-Fi)';
+    if (qrDone !== s.joinUrl && window.QRCode) {
+      $('qr').innerHTML = ''; new QRCode($('qr'), { text: s.joinUrl, width: 140, height: 140 }); qrDone = s.joinUrl;
+    }
+    $('chips').innerHTML = s.leaderboard.length
+      ? s.leaderboard.map((p) => `<span class="chip">${esc(p.name)}</span>`).join('')
+      : '<span style="color:var(--muted)">참가자를 기다리는 중…</span>';
+    $('startBtn').disabled = s.playerCount < 1;
+  }
+  if (s.phase === 'ready') {
+    show('vReady');
+    $('readyLbl').textContent = `ROUND ${s.round}`;
+  }
+  if (s.phase === 'input' || s.phase === 'result') {
+    show('vPlay');
+    $('prompt').textContent = s.prompt;
+    $('subCnt').textContent = s.submittedCount;
+    $('subTot').textContent = s.playerCount;
+    $('subBar').style.width = (s.playerCount ? (s.submittedCount / s.playerCount) * 100 : 0) + '%';
+  }
+  if (s.phase === 'result' && entered) showPopup(s);
+  if (s.phase !== 'result') hidePopup();
+  if (s.phase === 'final') {
+    show('vFinal');
+    const w = s.leaderboard[0];
+    $('winner').textContent = w ? w.name : '-';
+    $('wscore').textContent = w ? `${w.score.toLocaleString()} 점` : '';
+  }
+  renderBoard(s);
+}
+
+function renderBoard(s) {
+  const board = $('board');
+  const showGain = s.phase === 'result' || s.phase === 'final';
+  if (!s.leaderboard.length) { board.innerHTML = '<p class="empty">아직 참가자가 없어요</p>'; return; }
+  board.querySelector('.empty')?.remove();
+  const seen = new Set();
+  const maxRows = Math.max(1, Math.floor(board.clientHeight / 58));
+  s.leaderboard.forEach((p, i) => {
+    seen.add(p.id);
+    let el = board.querySelector(`[data-id="${p.id}"]`);
+    if (!el) { el = document.createElement('div'); el.className = 'row'; el.dataset.id = p.id; el.style.top = (i * 58 + 40) + 'px'; board.appendChild(el); }
+    el.className = `row r${p.rank}${p.connected ? '' : ' off'}`;
+    el.style.display = i < maxRows ? '' : 'none';
+    const submitted = s.phase === 'input' && p.submitted;
+    el.innerHTML = `<span class="rk">${p.rank}</span><span class="nm">${esc(p.name)}</span>`
+      + (submitted ? '<span class="ok" title="제출 완료"></span>' : '')
+      + (showGain && p.gain ? `<span class="gain">+${p.gain}</span>` : '')
+      + `<span class="sc">${p.score.toLocaleString()}</span>`;
+    requestAnimationFrame(() => (el.style.top = i * 58 + 'px'));
+  });
+  board.querySelectorAll('.row').forEach((el) => !seen.has(el.dataset.id) && el.remove());
+}
+
+function showPopup(s) {
+  clearTimeout(popTimer);
+  $('popTtl').textContent = `ROUND ${s.round} 싱크로 결과`;
+  $('popQ').textContent = `Q. ${s.prompt}`;
+  const r = s.results;
+  if (!r.length) {
+    $('podium').innerHTML = '<div class="nores">아무도 제출하지 않았어요 😶</div>';
+  } else {
+    const order = [1, 0, 2].filter((i) => r[i]); // 2위-1위-3위 배치
+    $('podium').innerHTML = order.map((i) => {
+      const x = r[i];
+      return `<div class="pod p${i + 1}" data-i="${i}">
+        <div class="word">${esc(x.word)}</div>
+        <div class="who">${x.names.slice(0, 6).map(esc).join(', ')}${x.names.length > 6 ? ` 외 ${x.names.length - 6}명` : ''}</div>
+        <div class="block"><div class="medal">${i + 1}</div><div class="cnt">${x.count}명${x.count < 2 ? ' · 싱크 실패' : ''}</div></div>
+      </div>`;
+    }).join('');
+    // 3위 → 2위 → 1위 순서로 등장
+    [2, 1, 0].forEach((i, k) => setTimeout(() => $('podium').querySelector(`[data-i="${i}"]`)?.classList.add('show'), 350 + k * 800));
+  }
+  $('popup').classList.remove('fade');
+  popTimer = setTimeout(hidePopup, 6200); // 이후 리더보드로 시선 이동
+}
+function hidePopup() { clearTimeout(popTimer); $('popup').classList.add('fade'); }
+
+// 타이머 루프
+let lastReady = null;
+(function loop() {
+  if (st) {
+    const rem = S100.remaining(st.endsAt);
+    if (st.phase === 'input') {
+      const sec = Math.ceil(rem);
+      $('ringNum').textContent = sec;
+      $('ringBar').style.strokeDashoffset = CIRC * (1 - rem / st.roundSec);
+      $('ring').classList.toggle('warn', sec <= 5);
+    } else if (st.phase === 'result') {
+      $('ringNum').textContent = 0; $('ringBar').style.strokeDashoffset = CIRC; $('ring').classList.remove('warn');
+    }
+    if (st.phase === 'ready') {
+      const n = Math.max(1, Math.ceil(rem));
+      if (n !== lastReady) { lastReady = n; const c = $('readyCnt'); c.textContent = n; c.classList.remove('tick'); void c.offsetWidth; c.classList.add('tick'); }
+    } else lastReady = null;
+  }
+  requestAnimationFrame(loop);
+})();
+window.addEventListener('resize', () => st && renderBoard(st));
+</script>
+</body>
+</html>

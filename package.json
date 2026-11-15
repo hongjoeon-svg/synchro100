@@ -1,0 +1,16 @@
+{
+  "name": "synchro-100",
+  "version": "0.1.0",
+  "private": true,
+  "description": "이심전심 타임어택 파티 게임 Synchro 100",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<meta name="theme-color" content="#0d0b1f" />
+<title>Synchro 100</title>
+<meta name="description" content="링크 눌러 바로 참여! 제시어를 보고 15초 안에 남들과 같은 단어를 빠르게 쓰면 고득점. 2030 모임용 이심전심 타임어택 파티 게임." />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Synchro 100" />
+<meta property="og:title" content="Synchro 100 · 이심전심 타임어택 🔥" />
+<meta property="og:description" content="링크 눌러 바로 참여! 15초 안에 모두와 같은 단어를 쓰면 고득점. 우리 중 누가 제일 잘 통할까?" />
+<meta property="og:image" content="__BASE_URL__/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:url" content="__BASE_URL__/" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/png" href="/icon.png" />
+<link rel="apple-touch-icon" href="/icon.png" />
+<link rel="stylesheet" href="/style.css" />
+<style>
+  body { min-height: 100dvh; }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 16px; min-height: 100dvh; display: flex; flex-direction: column; }
+  .center { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 16px; }
+
+  /* join */
+  .join .logo { font-size: 3rem; line-height: 1; }
+  .join p { color: var(--muted); }
+  .field { width: 100%; font: inherit; font-size: 1.4rem; font-weight: 700; text-align: center; color: var(--text);
+    background: rgba(255,255,255,.07); border: 2px solid var(--line); border-radius: 16px; padding: 16px; outline: none; transition: border-color .2s; }
+  .field:focus { border-color: var(--lime); }
+  .join .btn { width: 100%; }
+  .err { color: var(--pink); font-weight: 700; min-height: 1.4em; }
+
+  /* status bar */
+  .bar { display: flex; align-items: center; gap: 10px; padding: 12px 16px; margin-bottom: 14px; }
+  .bar .nm { font-weight: 900; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar .stat { text-align: right; }
+  .bar .stat small { display: block; color: var(--muted); font-size: .72rem; font-weight: 700; }
+  .bar .stat b { font-family: var(--display); font-size: 1.5rem; line-height: 1; }
+  .bar .stat.rank b { color: var(--cyan); }
+  .bar .stat.score b { color: var(--lime); }
+  .bar .div { width: 1px; height: 32px; background: var(--line); }
+
+  .rd { font-family: var(--display); color: var(--muted); font-size: 1.1rem; letter-spacing: 1px; }
+  .big { font-family: var(--display); font-size: 7rem; line-height: 1; color: var(--lime); }
+  .big.tick { animation: pop .6s ease-out; }
+  .prompt { font-family: var(--display); font-size: 1.9rem; line-height: 1.3; word-break: keep-all; animation: rise .4s ease-out; }
+
+  .ring { width: 140px; height: 140px; }
+  .ring .num { font-size: 3.6rem; }
+
+  .answer { width: 100%; font: inherit; font-family: var(--display); font-size: 2.4rem; text-align: center; color: var(--text);
+    background: rgba(255,255,255,.08); border: 3px solid var(--lime); border-radius: 20px; padding: 18px 12px; outline: none;
+    box-shadow: 0 0 0 6px rgba(198,255,61,.12); }
+  .answer::placeholder { color: rgba(255,255,255,.25); }
+  .submit { width: 100%; font-size: 1.8rem; padding: 18px; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .hint b { color: var(--lime); }
+
+  .done { width: 100%; padding: 26px 16px; animation: pop .4s ease-out; }
+  .done small { color: var(--muted); font-weight: 700; }
+  .done .w { font-family: var(--display); font-size: 2.6rem; margin: 6px 0; word-break: break-all; }
+  .done .t { color: var(--cyan); font-weight: 700; }
+
+  .gain { font-family: var(--display); font-size: 4.6rem; line-height: 1; animation: pop .6s ease-out; }
+  .gain.plus { color: var(--lime); text-shadow: 0 0 30px rgba(198,255,61,.5); }
+  .gain.zero { color: var(--pink); }
+  .calc { color: var(--muted); font-weight: 700; }
+  .top { width: 100%; padding: 14px; text-align: left; }
+  .top h4 { font-family: var(--display); font-weight: 400; color: var(--muted); margin-bottom: 8px; }
+  .top li { list-style: none; display: flex; justify-content: space-between; padding: 8px 4px; border-top: 1px solid var(--line); font-weight: 700; }
+  .top li:first-of-type { border-top: 0; }
+  .top li.mine { color: var(--lime); }
+  .top li span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .top li span:last-child { color: var(--muted); flex-shrink: 0; margin-left: 10px; }
+
+  .wait-dots span { display: inline-block; width: 12px; height: 12px; margin: 0 4px; border-radius: 50%; background: var(--lime); animation: bounce 1s infinite; }
+  .wait-dots span:nth-child(2) { animation-delay: .15s; background: var(--pink); }
+  .wait-dots span:nth-child(3) { animation-delay: .3s; background: var(--cyan); }
+  @keyframes bounce { 50% { transform: translateY(-12px); } }
+  .final-rank { font-family: var(--display); font-size: 5.5rem; line-height: 1; color: var(--gold); animation: pop .8s ease-out; }
+</style>
+</head>
+<body>
+<div id="conn"></div>
+<div class="wrap">
+  <!-- 접속 -->
+  <div class="center join" id="vJoin">
+    <div class="logo">SYNCHRO<br><b>1</b><i>00</i></div>
+    <p>모두와 같은 생각을, 누구보다 빠르게!</p>
+    <form id="joinForm" style="width:100%;display:flex;flex-direction:column;gap:12px">
+      <input class="field" id="nick" maxlength="12" placeholder="닉네임" autocomplete="off" />
+      <button class="btn" type="submit">입장하기</button>
+    </form>
+    <div class="err" id="joinErr"></div>
+  </div>
+
+  <!-- 게임 -->
+  <div id="vGame" class="hidden" style="display:flex;flex-direction:column;flex:1">
+    <div class="card bar">
+      <div class="nm" id="myName"></div>
+      <div class="stat rank"><small>내 순위</small><b id="myRank">-</b></div>
+      <div class="div"></div>
+      <div class="stat score"><small>누적 점수</small><b id="myScore">0</b></div>
+    </div>
+
+    <div class="center" id="sLobby">
+      <div class="wait-dots"><span></span><span></span><span></span></div>
+      <h2 style="font-family:var(--display);font-weight:400;font-size:1.8rem">입장 완료!</h2>
+      <p class="hint">호스트 화면을 봐 주세요.<br>곧 게임이 시작됩니다. (<span id="lobbyCnt">0</span>명 대기 중)</p>
+    </div>
+
+    <div class="center hidden" id="sReady">
+      <div class="rd" id="readyRd"></div>
+      <div class="big" id="readyCnt">3</div>
+      <p class="hint">제시어가 곧 나와요. 손가락 준비!</p>
+    </div>
+
+    <div class="center hidden" id="sInput">
+      <div class="rd" id="inRd"></div>
+      <div class="prompt" id="prompt"></div>
+      <div class="ring" id="ring">
+        <svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="52"/><circle class="bar" id="ringBar" cx="60" cy="60" r="52"/></svg>
+        <div class="num" id="ringNum">15</div>
+      </div>
+      <form id="ansForm" style="width:100%;display:flex;flex-direction:column;gap:12px">
+        <input class="answer" id="answer" maxlength="20" placeholder="단어 입력" autocomplete="off" autocapitalize="off" enterkeyhint="send" />
+        <button class="btn submit" type="submit">제출</button>
+      </form>
+      <p class="hint">지금 제출하면 1명당 <b id="nowPts">150</b>점</p>
+      <div class="card done hidden" id="done">
+        <small>제출 완료</small>
+        <div class="w" id="myWord"></div>
+        <div class="t" id="myRem"></div>
+      </div>
+    </div>
+
+    <div class="center hidden" id="sResult">
+      <div class="rd" id="resRd"></div>
+      <div class="gain" id="gain"></div>
+      <div class="calc" id="calc"></div>
+      <div class="card top"><h4>TOP 3 싱크로 단어</h4><ul id="topList"></ul></div>
+      <p class="hint">잠시 후 다음 라운드가 자동으로 시작돼요</p>
+    </div>
+
+    <div class="center hidden" id="sFinal">
+      <div class="rd">GAME OVER</div>
+      <div class="final-rank" id="finRank"></div>
+      <div class="calc" id="finScore"></div>
+      <p class="hint" id="finWinner"></p>
+    </div>
+  </div>
+</div>
+
+<script src="/common.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const { esc } = S100;
+const CIRC = 2 * Math.PI * 52;
+$('ringBar').style.strokeDasharray = CIRC;
+let st = null, me = null, lastKey = '';
+const saved = (() => { try { return JSON.parse(localStorage.getItem('s100') || 'null'); } catch { return null; } })();
+if (saved) $('nick').value = saved.name;
+
+S100.start(() => { if (saved?.id) S100.send({ t: 'join', id: saved.id, name: saved.name }); });
+
+$('joinForm').onsubmit = (e) => {
+  e.preventDefault();
+  const name = $('nick').value.trim();
+  if (!name) return ($('joinErr').textContent = '닉네임을 입력해 주세요.');
+  S100.send({ t: 'join', name, id: saved?.name === name ? saved.id : undefined });
+};
+$('ansForm').onsubmit = (e) => {
+  e.preventDefault();
+  const word = $('answer').value.trim();
+  if (!word) return $('answer').focus();
+  S100.send({ t: 'submit', word });
+  $('answer').blur();
+};
+
+S100.on('joined', (m) => {
+  try { localStorage.setItem('s100', JSON.stringify({ id: m.id, name: m.name })); } catch {}
+  $('vJoin').classList.add('hidden'); $('vGame').classList.remove('hidden');
+});
+S100.on('error', (m) => { $('joinErr').textContent = m.msg; });
+S100.on('kicked', () => { try { localStorage.removeItem('s100'); } catch {} location.reload(); });
+S100.on('state', (s) => { st = s; me = s.me || null; if (me) render(); });
+
+function show(id) {
+  ['sLobby', 'sReady', 'sInput', 'sResult', 'sFinal'].forEach((v) => $(v).classList.toggle('hidden', v !== id));
+}
+
+function render() {
+  const s = st, key = s.phase + s.round, entered = key !== lastKey; lastKey = key;
+  const row = s.leaderboard.find((r) => r.id === me.id);
+  $('myName').textContent = me.name;
+  $('myRank').textContent = row && s.round ? `${row.rank}위` : '-';
+  $('myScore').textContent = me.score.toLocaleString();
+  const rd = `ROUND ${s.round} / ${s.totalRounds}`;
+
+  if (s.phase === 'lobby') { show('sLobby'); $('lobbyCnt').textContent = s.playerCount; }
+  if (s.phase === 'ready') { show('sReady'); $('readyRd').textContent = rd; }
+  if (s.phase === 'input') {
+    show('sInput');
+    $('inRd').textContent = rd;
+    $('prompt').textContent = s.prompt;
+    const submitted = !!me.answer;
+    $('ansForm').classList.toggle('hidden', submitted);
+    $('nowPts').parentElement.classList.toggle('hidden', submitted);
+    $('done').classList.toggle('hidden', !submitted);
+    if (submitted) {
+      $('myWord').textContent = me.answer;
+      $('myRem').textContent = `잔여 ${me.rem}초에 제출 · 같은 단어 1명당 ${me.rem * 10}점`;
+    } else if (entered) {
+      $('answer').value = '';
+      setTimeout(() => $('answer').focus(), 50);
+    }
+  }
+  if (s.phase === 'result') {
+    show('sResult');
+    $('resRd').textContent = `ROUND ${s.round} 결과`;
+    const g = $('gain');
+    g.textContent = me.gain ? `+${me.gain}` : '0';
+    g.className = 'gain ' + (me.gain ? 'plus' : 'zero');
+    $('calc').textContent = !me.answer ? '제출하지 않았어요 😢'
+      : me.gain ? `"${me.answer}" · ${me.match}명 싱크 × ${me.rem}초 × 10`
+      : `"${me.answer}" · 나만 쓴 단어라 싱크 실패!`;
+    $('topList').innerHTML = s.results.length
+      ? s.results.map((r, i) => `<li class="${me.answer && normalize(r.word) === normalize(me.answer) ? 'mine' : ''}"><span>${i + 1}. ${esc(r.word)}</span><span>${r.count}명</span></li>`).join('')
+      : '<li><span>제출된 단어가 없어요</span><span></span></li>';
+  }
+  if (s.phase === 'final') {
+    show('sFinal');
+    $('finRank').textContent = row ? `${row.rank}위` : '-';
+    $('finScore').textContent = `최종 ${me.score.toLocaleString()}점`;
+    const w = s.leaderboard[0];
+    $('finWinner').textContent = w ? (w.id === me.id ? '🏆 당신이 싱크로 챔피언!' : `🏆 챔피언: ${w.name} (${w.score.toLocaleString()}점)`) : '';
+  }
+}
+// 서버와 동일한 정규화 (내 단어 하이라이트용)
+function normalize(w) { return String(w || '').normalize('NFC').toLowerCase().replace(/[\s.,!?~'"`·\-_]/g, ''); }
+
+let lastReady = null;
+(function loop() {
+  if (st && me) {
+    const rem = S100.remaining(st.endsAt);
+    if (st.phase === 'input') {
+      const sec = Math.ceil(rem);
+      $('ringNum').textContent = sec;
+      $('ringBar').style.strokeDashoffset = CIRC * (1 - rem / st.roundSec);
+      $('ring').classList.toggle('warn', sec <= 5);
+      $('nowPts').textContent = sec * 10;
+    }
+    if (st.phase === 'ready') {
+      const n = Math.max(1, Math.ceil(rem));
+      if (n !== lastReady) { lastReady = n; const c = $('readyCnt'); c.textContent = n; c.classList.remove('tick'); void c.offsetWidth; c.classList.add('tick'); }
+    } else lastReady = null;
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
